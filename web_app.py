@@ -31,7 +31,14 @@ CORS(app)
 
 # Configuration
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
-VENV_PYTHON = os.path.join(PROJECT_DIR, "betting_bot", "bin", "python")
+
+# Use appropriate Python executable for the environment
+if os.path.exists(os.path.join(PROJECT_DIR, "betting_bot", "bin", "python")):
+    # Local development with virtual environment
+    VENV_PYTHON = os.path.join(PROJECT_DIR, "betting_bot", "bin", "python")
+else:
+    # Production environment (Render, Railway, etc.)
+    VENV_PYTHON = "python"
 
 class OutputCapture:
     """Capture stdout for web display"""
@@ -82,6 +89,13 @@ def run_command_safely(command, description):
             'error': str(e)
         }
 
+def build_python_command(script_with_args):
+    """Build a Python command with the correct executable"""
+    if VENV_PYTHON == "python":
+        return f"python {script_with_args}"
+    else:
+        return f'"{VENV_PYTHON}" {script_with_args}'
+
 @app.route('/')
 def index():
     """Main page"""
@@ -90,7 +104,7 @@ def index():
 @app.route('/api/status')
 def get_status():
     """Get project status"""
-    cmd = f'"{VENV_PYTHON}" manage.py status'
+    cmd = build_python_command('manage.py status')
     result = run_command_safely(cmd, "Getting project status")
     return jsonify(result)
 
@@ -101,21 +115,21 @@ def run_arbitrage():
     sport = data.get('sport', 'basketball_nba')
     bet_size = data.get('bet_size', 100)
     
-    cmd = f'"{VENV_PYTHON}" run_bot.py --mode arbitrage --sport {sport} --bet-size {bet_size}'
+    cmd = build_python_command(f'run_bot.py --mode arbitrage --sport {sport} --bet-size {bet_size}')
     result = run_command_safely(cmd, f"Running arbitrage analysis for {sport}")
     return jsonify(result)
 
 @app.route('/api/run-dfs')
 def run_dfs():
     """Run DFS analysis"""
-    cmd = f'"{VENV_PYTHON}" run_bot.py --mode dfs'
+    cmd = build_python_command('run_bot.py --mode dfs')
     result = run_command_safely(cmd, "Running DFS analysis")
     return jsonify(result)
 
 @app.route('/api/run-wnba')
 def run_wnba():
     """Run WNBA betting analysis"""
-    cmd = f'"{VENV_PYTHON}" run_bot.py --mode wnba'
+    cmd = build_python_command('run_bot.py --mode wnba')
     result = run_command_safely(cmd, "Running WNBA betting analysis")
     return jsonify(result)
 
@@ -126,21 +140,21 @@ def run_backtest():
     date = data.get('date', '2024-01-15')
     sport = data.get('sport', 'basketball_nba')
     
-    cmd = f'"{VENV_PYTHON}" backtest_strategy.py --date "{date}" --sport {sport}'
+    cmd = build_python_command(f'backtest_strategy.py --date "{date}" --sport {sport}')
     result = run_command_safely(cmd, f"Running backtest for {date}")
     return jsonify(result)
 
 @app.route('/api/available-options')
 def get_available_options():
     """Get available sports, regions, and markets"""
-    cmd = f'"{VENV_PYTHON}" run_bot.py --list-options'
+    cmd = build_python_command('run_bot.py --list-options')
     result = run_command_safely(cmd, "Getting available options")
     return jsonify(result)
 
 @app.route('/api/test-setup')
 def test_setup():
     """Run setup tests"""
-    cmd = f'"{VENV_PYTHON}" test_setup.py'
+    cmd = build_python_command('test_setup.py')
     result = run_command_safely(cmd, "Running setup tests")
     return jsonify(result)
 

@@ -164,6 +164,11 @@ All these files are already created for you:
 
 ### **Common Issues:**
 
+**❌ "/bin/sh: 1: /opt/render/project/src/betting_bot/bin/python: not found"**
+- This means the app is trying to use local virtual environment paths in production
+- ✅ **Fixed in latest version** - the app now automatically detects production vs development
+- If you still see this error, redeploy after pushing the latest code changes
+
 **❌ "Application failed to start"**
 - Check that `requirements.txt` includes all dependencies
 - Verify `Procfile` is correct
@@ -210,3 +215,35 @@ All these files are already created for you:
 - [Gunicorn Documentation](https://gunicorn.org/)
 - [Railway Documentation](https://docs.railway.app/)
 - [Render Documentation](https://render.com/docs)
+
+## 🔄 **Updating Your Deployed App**
+
+If your app is already deployed but showing errors, here's how to update it:
+
+### **📤 Push Updates to GitHub:**
+```bash
+# Make sure you have the latest fixes
+git add .
+git commit -m "Fixed production deployment issues"
+git push origin main
+```
+
+### **🔄 Redeploy (Automatic):**
+- **Railway:** Updates automatically in ~30 seconds
+- **Render:** Updates automatically in ~2-3 minutes  
+- **Vercel:** Updates automatically in ~30 seconds
+
+### **🔍 Check Deployment Status:**
+- Watch your hosting platform's build logs
+- Make sure the build completes successfully
+- Test the live site after deployment
+
+### **🚨 Common Fix for Python Path Issues:**
+If you see errors like `/opt/render/project/src/betting_bot/bin/python: not found`:
+
+1. **The issue is fixed** in the latest code
+2. **Push to GitHub:** `git push origin main`
+3. **Wait for auto-redeploy** (2-3 minutes on Render)
+4. **Your app should work perfectly!**
+
+---
