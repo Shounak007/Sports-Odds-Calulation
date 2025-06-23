@@ -22,6 +22,13 @@ from pathlib import Path
 PROJECT_DIR = Path(__file__).parent.absolute()
 VENV_PYTHON = PROJECT_DIR / "betting_bot" / "bin" / "python"
 
+def get_python_executable():
+    """Get the correct Python executable for the current environment"""
+    if VENV_PYTHON.exists():
+        return f'"{VENV_PYTHON}"'
+    else:
+        return "python"
+
 def run_command(command, description):
     """Run a shell command with description"""
     print(f"🔧 {description}...")
@@ -40,52 +47,60 @@ def run_command(command, description):
 def install_dependencies():
     """Install project dependencies"""
     print("📦 Installing dependencies...")
-    return run_command(f'"{VENV_PYTHON}" -m pip install -r requirements.txt', 
+    python_exec = get_python_executable()
+    return run_command(f'{python_exec} -m pip install -r requirements.txt', 
                       "Installing Python packages")
 
 def run_tests():
     """Run the setup tests"""
     print("🧪 Running setup tests...")
-    return run_command(f'"{VENV_PYTHON}" test_setup.py', "Running tests")
+    python_exec = get_python_executable()
+    return run_command(f'{python_exec} test_setup.py', "Running tests")
 
 def run_bot(args=None):
     """Run the main arbitrage bot"""
-    cmd = f'"{VENV_PYTHON}" arbitrage_bot.py'
+    python_exec = get_python_executable()
+    cmd = f'{python_exec} arbitrage_bot.py'
     if args:
         cmd += f" {args}"
     return run_command(cmd, "Running arbitrage bot")
 
 def run_cli_bot(args=None):
     """Run the CLI version of the bot"""
-    cmd = f'"{VENV_PYTHON}" run_bot.py'
+    python_exec = get_python_executable()
+    cmd = f'{python_exec} run_bot.py'
     if args:
         cmd += f" {args}"
     return run_command(cmd, "Running CLI bot")
 
 def run_dfs_analyzer(args=None):
     """Run the DFS props analyzer"""
-    cmd = f'"{VENV_PYTHON}" dfs_props_analyzer.py'
+    python_exec = get_python_executable()
+    cmd = f'{python_exec} dfs_props_analyzer.py'
     if args:
         cmd += f" {args}"
     return run_command(cmd, "Running DFS props analyzer")
 
 def run_backtest(args=None):
     """Run historical backtesting"""
-    cmd = f'"{VENV_PYTHON}" backtest_strategy.py'
+    python_exec = get_python_executable()
+    cmd = f'{python_exec} backtest_strategy.py'
     if args:
         cmd += f" {args}"
     return run_command(cmd, "Running backtest")
 
 def run_real_wnba_analyzer(args=None):
     """Run the real-time WNBA analyzer"""
-    cmd = f'"{VENV_PYTHON}" real_wnba_analyzer.py'
+    python_exec = get_python_executable()
+    cmd = f'{python_exec} real_wnba_analyzer.py'
     if args:
         cmd += f" {args}"
     return run_command(cmd, "Running real-time WNBA analyzer")
 
 def run_web_app(args=None):
     """Run the web interface"""
-    cmd = f'"{VENV_PYTHON}" web_app.py'
+    python_exec = get_python_executable()
+    cmd = f'{python_exec} web_app.py'
     if args:
         cmd += f" {args}"
     return run_command(cmd, "Starting web interface")
@@ -95,16 +110,20 @@ def show_status():
     print("📊 Project Status")
     print("=" * 30)
     
-    # Check if virtual environment exists
-    if VENV_PYTHON.exists():
-        print("✅ Virtual environment: Ready")
+    # Detect environment type
+    is_production = not VENV_PYTHON.exists()
+    python_executable = "python" if is_production else str(VENV_PYTHON)
+    
+    if is_production:
+        print("✅ Environment: Production (Deployed)")
+        print("✅ Python: System Python with packages")
     else:
-        print("❌ Virtual environment: Not found")
-        return
+        print("✅ Environment: Local Development")
+        print("✅ Virtual environment: Ready")
     
     # Check Python version
     try:
-        result = subprocess.run([str(VENV_PYTHON), "--version"], 
+        result = subprocess.run([python_executable, "--version"], 
                               capture_output=True, text=True)
         print(f"✅ Python version: {result.stdout.strip()}")
     except:
@@ -112,7 +131,7 @@ def show_status():
     
     # Check if dependencies are installed
     try:
-        subprocess.run([str(VENV_PYTHON), "-c", "import requests, colorama, dotenv, tabulate"], 
+        subprocess.run([python_executable, "-c", "import requests, colorama, dotenv, tabulate, flask"], 
                       check=True, capture_output=True)
         print("✅ Dependencies: Installed")
     except:
