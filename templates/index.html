@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Betting Bot Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+        .action-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        .btn-custom {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            color: white;
+            transform: scale(1.05);
+        }
+        .output-area {
+            background: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            border-radius: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .loading {
+            display: none;
+        }
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-online {
+            background: #27ae60;
+            color: white;
+        }
+        .status-offline {
+            background: #e74c3c;
+            color: white;
+        }
+        .icon-large {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <!-- Header -->
+            <div class="header">
+                <h1><i class="fas fa-chart-line"></i> Sports Betting Bot Dashboard</h1>
+                <p class="mb-0">Real-time arbitrage analysis, DFS optimization, and WNBA betting insights</p>
+                <div id="status-badge" class="status-badge status-offline">
+                    <i class="fas fa-circle"></i> Checking...
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="p-4">
+                <!-- Quick Actions Row -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card action-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-exchange-alt icon-large text-primary"></i>
+                                <h5 class="card-title">Arbitrage Analysis</h5>
+                                <p class="card-text">Find guaranteed profit opportunities across sportsbooks</p>
+                                <button class="btn btn-custom" onclick="runArbitrage()">
+                                    <i class="fas fa-search"></i> Find Arbitrage
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card action-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-trophy icon-large text-warning"></i>
+                                <h5 class="card-title">DFS Analysis</h5>
+                                <p class="card-text">Daily Fantasy Sports player value and lineup optimization</p>
+                                <button class="btn btn-custom" onclick="runDFS()">
+                                    <i class="fas fa-users"></i> Analyze DFS
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card action-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-basketball-ball icon-large text-danger"></i>
+                                <h5 class="card-title">WNBA Betting</h5>
+                                <p class="card-text">Tomorrow's WNBA games with confidence-scored props</p>
+                                <button class="btn btn-custom" onclick="runWNBA()">
+                                    <i class="fas fa-chart-bar"></i> WNBA Analysis
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card action-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-history icon-large text-success"></i>
+                                <h5 class="card-title">Backtest</h5>
+                                <p class="card-text">Historical analysis of arbitrage opportunities</p>
+                                <button class="btn btn-custom" onclick="showBacktestModal()">
+                                    <i class="fas fa-calendar"></i> Backtest
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Options -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card action-card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-cog"></i> System Status</h5>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="checkStatus()">
+                                        <i class="fas fa-info-circle"></i> Check Status
+                                    </button>
+                                    <button class="btn btn-outline-success btn-sm" onclick="testSetup()">
+                                        <i class="fas fa-check-circle"></i> Test Setup
+                                    </button>
+                                    <button class="btn btn-outline-info btn-sm" onclick="getOptions()">
+                                        <i class="fas fa-list"></i> Available Options
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card action-card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-basketball-ball"></i> Custom Arbitrage</h5>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <select class="form-select form-select-sm mb-2" id="sport-select">
+                                            <option value="basketball_nba">NBA</option>
+                                            <option value="basketball_wnba">WNBA</option>
+                                            <option value="americanfootball_nfl">NFL</option>
+                                            <option value="soccer_epl">Premier League</option>
+                                            <option value="baseball_mlb">MLB</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" class="form-control form-control-sm mb-2" 
+                                               id="bet-size" placeholder="Bet Size" value="100">
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm" onclick="runCustomArbitrage()">
+                                    <i class="fas fa-play"></i> Run Custom Analysis
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output Area -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-terminal"></i> Analysis Output</h5>
+                        <div>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="clearOutput()">
+                                <i class="fas fa-eraser"></i> Clear
+                            </button>
+                            <div class="loading spinner-border spinner-border-sm ms-2" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <pre id="output" class="output-area p-3 m-0">Welcome to Sports Betting Bot Dashboard!
+Click any of the buttons above to start analyzing betting opportunities.
+
+Available Commands:
+• Arbitrage Analysis: Find guaranteed profit opportunities
+• DFS Analysis: Daily Fantasy Sports optimization  
+• WNBA Betting: Tomorrow's games with confidence scores
+• Backtest: Historical arbitrage analysis
+• System Status: Check bot configuration and health</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backtest Modal -->
+    <div class="modal fade" id="backtestModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Historical Backtest</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="backtest-date" class="form-label">Date (YYYY-MM-DD)</label>
+                        <input type="date" class="form-control" id="backtest-date">
+                    </div>
+                    <div class="mb-3">
+                        <label for="backtest-sport" class="form-label">Sport</label>
+                        <select class="form-select" id="backtest-sport">
+                            <option value="basketball_nba">NBA</option>
+                            <option value="basketball_wnba">WNBA</option>
+                            <option value="americanfootball_nfl">NFL</option>
+                            <option value="soccer_epl">Premier League</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="runBacktest()">Run Backtest</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let isRunning = false;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkStatus();
+            
+            // Set default backtest date to 30 days ago
+            const date = new Date();
+            date.setDate(date.getDate() - 30);
+            document.getElementById('backtest-date').value = date.toISOString().split('T')[0];
+        });
+
+        // Utility functions
+        function showLoading() {
+            if (!isRunning) {
+                isRunning = true;
+                document.querySelector('.loading').style.display = 'inline-block';
+                appendOutput('\n🔄 Running analysis...\n');
+            }
+        }
+
+        function hideLoading() {
+            isRunning = false;
+            document.querySelector('.loading').style.display = 'none';
+        }
+
+        function appendOutput(text) {
+            const output = document.getElementById('output');
+            output.textContent += text;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('output').textContent = 'Output cleared. Ready for next analysis.\n';
+        }
+
+        function updateStatus(online) {
+            const badge = document.getElementById('status-badge');
+            if (online) {
+                badge.className = 'status-badge status-online';
+                badge.innerHTML = '<i class="fas fa-circle"></i> Online';
+            } else {
+                badge.className = 'status-badge status-offline';
+                badge.innerHTML = '<i class="fas fa-circle"></i> Offline';
+            }
+        }
+
+        // API Functions
+        async function makeRequest(url, options = {}) {
+            try {
+                showLoading();
+                const response = await fetch(url, options);
+                const data = await response.json();
+                
+                if (data.success) {
+                    appendOutput(data.output);
+                    updateStatus(true);
+                } else {
+                    appendOutput(`❌ Error: ${data.error}\n`);
+                    if (data.output) appendOutput(data.output);
+                }
+                
+                hideLoading();
+                return data;
+            } catch (error) {
+                hideLoading();
+                appendOutput(`❌ Network Error: ${error.message}\n`);
+                updateStatus(false);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Main Functions
+        async function checkStatus() {
+            appendOutput('\n📊 Checking system status...\n');
+            await makeRequest('/api/status');
+        }
+
+        async function runArbitrage() {
+            appendOutput('\n🔍 Starting arbitrage analysis...\n');
+            await makeRequest('/api/run-arbitrage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sport: 'basketball_nba', bet_size: 100 })
+            });
+        }
+
+        async function runDFS() {
+            appendOutput('\n🏆 Starting DFS analysis...\n');
+            await makeRequest('/api/run-dfs');
+        }
+
+        async function runWNBA() {
+            appendOutput('\n🏀 Starting WNBA betting analysis...\n');
+            await makeRequest('/api/run-wnba');
+        }
+
+        async function runCustomArbitrage() {
+            const sport = document.getElementById('sport-select').value;
+            const betSize = document.getElementById('bet-size').value;
+            
+            appendOutput(`\n🎯 Running custom arbitrage analysis for ${sport} with $${betSize} bet size...\n`);
+            await makeRequest('/api/run-arbitrage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sport: sport, bet_size: parseInt(betSize) })
+            });
+        }
+
+        async function testSetup() {
+            appendOutput('\n🧪 Running setup tests...\n');
+            await makeRequest('/api/test-setup');
+        }
+
+        async function getOptions() {
+            appendOutput('\n📋 Getting available options...\n');
+            await makeRequest('/api/available-options');
+        }
+
+        function showBacktestModal() {
+            new bootstrap.Modal(document.getElementById('backtestModal')).show();
+        }
+
+        async function runBacktest() {
+            const date = document.getElementById('backtest-date').value;
+            const sport = document.getElementById('backtest-sport').value;
+            
+            if (!date) {
+                alert('Please select a date for backtesting');
+                return;
+            }
+            
+            bootstrap.Modal.getInstance(document.getElementById('backtestModal')).hide();
+            
+            appendOutput(`\n📈 Running backtest for ${date} (${sport})...\n`);
+            await makeRequest('/api/run-backtest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: date, sport: sport })
+            });
+        }
+
+        // Auto-refresh status every 5 minutes
+        setInterval(checkStatus, 300000);
+    </script>
+</body>
+</html>
